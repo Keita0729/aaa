@@ -8,7 +8,8 @@
         :root {
             --pitch-green: #2e7d32;
             --line-white: rgba(255, 255, 255, 0.8);
-            --arsenal-red: #EF0107; --kobe-crimson: #800000; --barca-blue: #004D98;
+            --arsenal-red: #EF0107; --kobe-crimson: #800000; 
+            --barca-blue: #004D98;
             --bench-gray: #1a1a1a;
         }
 
@@ -18,13 +19,21 @@
             background-color: #050505; margin: 0; padding: 10px; color: white;
         }
 
-        /* AI Prediction Panel - More Data-focused */
+        /* AI Prediction Panel - 右側に固定 */
         #ai-prediction {
-            position: fixed; top: 20px; right: 20px; width: 240px;
-            background: rgba(20, 20, 20, 0.9); border: 1px solid #333;
-            border-radius: 8px; padding: 15px; z-index: 1000;
+            position: fixed; 
+            top: 20px; 
+            right: 10px; /* 右端から10pxの位置に配置 */
+            width: 240px;
+            background: rgba(20, 20, 20, 0.95); 
+            border: 1px solid #333;
+            border-radius: 8px; 
+            padding: 15px; 
+            z-index: 1000;
             border-left: 4px solid #2ecc71;
+            box-shadow: -5px 4px 15px rgba(0,0,0,0.5);
         }
+
         .ai-header { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .match-up { font-size: 14px; font-weight: 800; margin: 5px 0; display: flex; justify-content: space-between; }
         .win-bar-container { height: 6px; background: #333; border-radius: 3px; overflow: hidden; display: flex; margin: 12px 0; }
@@ -75,7 +84,6 @@
             position: absolute; top: 38px; background: #000; color: #fff;
             padding: 1px 4px; font-size: 8px; white-space: nowrap; pointer-events: none;
         }
-
         .bench-slot { position: relative; width: 36px; height: 36px; margin: 6px auto; }
 
         .color-ARS { background: var(--arsenal-red); }
@@ -120,7 +128,6 @@
     </div>
 
     <script>
-        // 2026 Reality Ratings (League Coefficient incorporated)
         const teamData = {
             VIS: { color: "color-VIS", elo: 1650, league: 0.75, starters: [{name:"Maekawa",num:1,pos:{t:5,l:50}},{name:"Thuler",num:3,pos:{t:15,l:60}},{name:"Yamakawa",num:4,pos:{t:15,l:40}},{name:"Sakai",num:24,pos:{t:22,l:85}},{name:"Diego",num:15,pos:{t:22,l:15}},{name:"Ideguchi",num:7,pos:{t:28,l:50}},{name:"Ogihara",num:6,pos:{t:35,l:65}},{name:"Sasaki",num:13,pos:{t:35,l:35}},{name:"Muto",num:11,pos:{t:45,l:80}},{name:"Osako",num:10,pos:{t:47,l:50}},{name:"Miyashiro",num:9,pos:{t:45,l:20}}], bench: [{name:"Gonda",num:71},{name:"Kikuchi",num:19},{name:"Hatsuse",num:11},{name:"Ide",num:18},{name:"Yuruqi",num:14},{name:"Patric",num:26},{name:"Jean",num:11}] },
             ARS: { color: "color-ARS", elo: 2050, league: 1.0, starters: [{name:"Raya",num:1,pos:{t:5,l:50}},{name:"Saliba",num:2,pos:{t:15,l:62}},{name:"Gabriel",num:6,pos:{t:15,l:38}},{name:"Timber",num:12,pos:{t:22,l:85}},{name:"Calafiori",num:33,pos:{t:22,l:15}},{name:"Zubimendi",num:36,pos:{t:28,l:50}},{name:"Rice",num:41,pos:{t:35,l:30}},{name:"Odegaard",num:8,pos:{t:35,l:70}},{name:"Saka",num:7,pos:{t:45,l:85}},{name:"Gyökeres",num:14,pos:{t:47,l:50}},{name:"Eze",num:10,pos:{t:45,l:15}}], bench: [{name:"Kepa",num:13},{name:"B.White",num:4},{name:"Tomiyasu",num:18},{name:"Merino",num:23},{name:"Nwaneri",num:22},{name:"Havertz",num:29},{name:"Martinelli",num:11}] },
@@ -130,19 +137,18 @@
         function updateAI() {
             const hK = document.getElementById('homeSelect').value, aK = document.getElementById('awaySelect').value;
             const h = teamData[hK], a = teamData[aK];
-
-            // Reality Engine: (Elo * League Weight) + Home Advantage
-            const hScore = (h.elo * h.league) + 100; // +100 for home
+            const hScore = (h.elo * h.league) + 100; 
             const aScore = (a.elo * a.league);
-
             const prob = Math.round((hScore / (hScore + aScore)) * 100);
 
             document.getElementById('h-prob').innerText = prob + "%";
             document.getElementById('a-prob').innerText = (100 - prob) + "%";
             document.getElementById('h-tag').innerText = hK;
             document.getElementById('a-tag').innerText = aK;
-            document.getElementById('bar-h').style.width = prob + "%";
-            document.getElementById('bar-h').style.backgroundColor = (hK==='VIS') ? '#800000' : (hK==='ARS' ? '#EF0107' : '#004D98');
+            const barH = document.getElementById('bar-h');
+            barH.style.width = prob + "%";
+            const colors = { VIS: '#800000', ARS: '#EF0107', BAR: '#004D98' };
+            barH.style.backgroundColor = colors[hK] || '#2ecc71';
         }
 
         function deployAll() {
@@ -193,10 +199,13 @@
         }
         function handleEnd() { if (activePlayer) { activePlayer.style.zIndex = 10; activePlayer = null; } }
 
-        document.addEventListener('mousedown', handleStart); document.addEventListener('touchstart', handleStart, {passive: false});
-        window.addEventListener('mousemove', handleMove, {passive: false}); window.addEventListener('touchmove', handleMove, {passive: false});
-        window.addEventListener('mouseup', handleEnd); window.addEventListener('touchend', handleEnd);
+        document.addEventListener('mousedown', handleStart); 
+        document.addEventListener('touchstart', handleStart, {passive: false});
+        window.addEventListener('mousemove', handleMove, {passive: false}); 
+        window.addEventListener('touchmove', handleMove, {passive: false});
+        window.addEventListener('mouseup', handleEnd); 
+        window.addEventListener('touchend', handleEnd);
         window.onload = deployAll;
     </script>
 </body>
-</html> 
+</html>
